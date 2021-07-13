@@ -151,7 +151,7 @@ def coords_to_pts(pdbfile: str, path_to_apbs: str, output_path: str, suffix: str
     clf = neighbors.KNeighborsClassifier(3)
     clf.fit(centroid, hlabel * 10)
     dist, ind = clf.kneighbors(coords)
-    pred = np.sum(hlabel[ind] * dist, 1) / np.sum(dist, 1)
+    pred = np.sum(hlabel[ind] * dist, 1) / np.sum(dist, 1) / 10.0
 
     with open(f"{path_to_apbs}{pdbid}-{suffix}.pqr.dx", 'r') as f:
         gl, orl, dl, vl = parsefile(f)
