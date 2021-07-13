@@ -64,12 +64,14 @@ if pointsl.size()[1] + pointsr.size()[1] > memlim:
     
 pointsr = pointsr.transpose(2, 1).cuda()
 pointsl = pointsl.transpose(2, 1).cuda()
+print(pointsl.shape)
+print(pointsr.shape)
 
 classifier = classifier.eval()
 
 pred, _, _ = classifier(pointsr,pointsl)
 
 pred = pred.view(-1, 1)
-
+print(torch.sigmoid(pred).view(1, -1).data.cpu())
 np.savetxt(filel[0:4]+'_prob_r_l.seg',torch.sigmoid(pred).view(1, -1).data.cpu())
     
