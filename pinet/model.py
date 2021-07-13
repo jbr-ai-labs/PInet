@@ -178,6 +178,52 @@ class PointNetfeat4geo(nn.Module):
             x = x.view(-1, 1024, 1).repeat(1, 1, n_pts)
             return x, pointfeat, trans, trans_feat
 
+class PointNetDenseCls12One(nn.Module):
+    def __init__(self, k = 2, feature_transform=False,pdrop=0.0,id=5):
+        super(PointNetDenseCls12One, self).__init__()
+        self.k = k
+        self.feature_transform=feature_transform
+        self.feat = PointNetfeat4(global_feat=True, feature_transform=feature_transform,d=id)
+        self.conv0 = torch.nn.Conv1d(2112, 1024, 1)
+        self.conv1 = torch.nn.Conv1d(1024, 512, 1)
+        self.conv2 = torch.nn.Conv1d(512, 256, 1)
+        self.conv3 = torch.nn.Conv1d(256, 128, 1)
+        self.conv4 = torch.nn.Conv1d(128, 64, 1)
+        self.conv5 = torch.nn.Conv1d(64, 1, 1)
+        self.bn0 = nn.BatchNorm1d(1024)
+        self.bn1 = nn.BatchNorm1d(512)
+        self.bn2 = nn.BatchNorm1d(256)
+        self.bn3 = nn.BatchNorm1d(128)
+        self.bn4 = nn.BatchNorm1d(64)
+        self.dropout = nn.Dropout(p=pdrop)
+
+    def forward(self, x1):
+        # batchsize = x1.size()[0]
+        x1gf,x1pf, trans1, trans_feat1 = self.feat(x1)
+
+        # global
+        xf1 = torch.cat([x1gf, x1gf], 1)
+
+        # point feat concat with global
+        xf1 = xf1.repeat(1,1,x1pf.size()[2])
+        x = torch.cat([x1pf, xf1], 1)
+
+        # MLP
+        x = F.relu(self.bn0(self.dropout(self.conv0(x))))
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+
+        x = F.relu(self.bn4(self.conv4(x)))
+        x = self.conv5(x)
+        x = x.transpose(2, 1).contiguous()
+
+        x = x.view(-1, 1)
+
+        # x = x.view(batchsize, x1.size()[2]+x2.size()[2], 1)
+        return x
+
+
 # general use one
 class PointNetDenseCls12(nn.Module):
     def __init__(self, k = 2, feature_transform=False,pdrop=0.0,id=5):

@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/home/ant/data/PInet/')
-print(sys.path)
+# sys.path.append('/home/ant/data/PInet/')
+# print(sys.path)
 from typing import Optional
 from pymol import cmd
 from tqdm import tqdm
@@ -309,6 +309,6 @@ if __name__ == '__main__':
             continue
     end = time.time()
     time_info(start, end)
-    torch.save(complex_true, 'complex_true')
-    torch.save(complex_false, 'complex_false')
-
+    # torch.save(complex_true, 'complex_true')
+    # torch.save(complex_false, 'complex_false')
+    print('Done')
